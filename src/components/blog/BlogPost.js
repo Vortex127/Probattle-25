@@ -37,6 +37,42 @@ export default function BlogPost() {
     navigate(`/tags?tags=${tag}`);
   };
 
+  const handleExport = async (type) => {
+    try {
+      if (!post) return;
+
+      if (type === 'pdf') {
+        // Mock PDF export
+        console.log('Exporting as PDF:', post.title);
+        // TODO: Implement actual PDF export
+        window.alert('PDF export coming soon!');
+      } else if (type === 'markdown') {
+        // Convert HTML to Markdown
+        const markdown = post.content
+          .replace(/<h1>(.*?)<\/h1>/g, '# $1\n\n')
+          .replace(/<h2>(.*?)<\/h2>/g, '## $1\n\n')
+          .replace(/<p>(.*?)<\/p>/g, '$1\n\n')
+          .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
+          .replace(/<em>(.*?)<\/em>/g, '*$1*')
+          .replace(/<code>(.*?)<\/code>/g, '`$1`');
+
+        // Create and download file
+        const blob = new Blob([markdown], { type: 'text/markdown' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${post.title.toLowerCase().replace(/\s+/g, '-')}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      window.alert('Export failed. Please try again.');
+    }
+  };
+
   useKeyboardShortcuts([
     {
       key: 'e',
