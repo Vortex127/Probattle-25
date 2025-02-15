@@ -1,21 +1,17 @@
 import { createContext, useContext, useState } from 'react';
+import { auth } from '../services/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  const login = async (credentials) => {
-    // TODO: Implement actual login logic with API
-    // For now, just simulate a successful login
-    setUser({ 
-      id: '1', 
-      email: credentials.email,
-      role: 'user'
-    });
+  const login = (userData) => {
+    setUser(userData);
   };
 
   const logout = () => {
+    auth.logout();
     setUser(null);
   };
 
@@ -27,9 +23,5 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return useContext(AuthContext);
 }

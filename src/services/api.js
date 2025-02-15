@@ -1,79 +1,94 @@
+import axios from 'axios';
+
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
 
-export const api = {
-  // Auth
+const api = axios.create({
+  baseURL: `${API_BASE_URL}/api`,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Add token to requests if it exists
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const auth = {
+  register: async (userData) => {
+    try {
+      const response = await api.post('/auth/register', userData);
+      // Store token
+      localStorage.setItem('token', response.data.token);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   login: async (credentials) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-    if (!response.ok) throw new Error('Login failed');
-    return response.json();
+    try {
+      const response = await api.post('/auth/login', credentials);
+      // Store token
+      localStorage.setItem('token', response.data.token);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
   },
 
-  // Blog posts
-  getPosts: async () => {
-    const response = await fetch(`${API_BASE_URL}/posts`);
-    if (!response.ok) throw new Error('Failed to fetch posts');
-    return response.json();
-  },
+  logout: () => {
+    localStorage.removeItem('token');
+  }
+};
 
-  getPost: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/posts/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch post');
-    return response.json();
-  },
+export default api;
 
-  createPost: async (post) => {
-    const response = await fetch(`${API_BASE_URL}/posts`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(post),
-    });
-    if (!response.ok) throw new Error('Failed to create post');
-    return response.json();
-  },
+// Blog posts
+export const getPosts = async () => {
+  const response = await api.get('/posts');
+  if (!response.ok) throw new Error('Failed to fetch posts');
+  return response.data;
+};
 
-  // Tasks
-  getTasks: async () => {
-    const response = await fetch(`${API_BASE_URL}/tasks`);
-    if (!response.ok) throw new Error('Failed to fetch tasks');
-    return response.json();
-  },
+export const getPost = async (id) => {
+  const response = await api.get(`/posts/${id}`);
+  if (!response.ok) throw new Error('Failed to fetch post');
+  return response.data;
+};
 
-  createTask: async (task) => {
-    const response = await fetch(`${API_BASE_URL}/tasks`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(task),
-    });
-    if (!response.ok) throw new Error('Failed to create task');
-    return response.json();
-  },
+export const createPost = async (post) => {
+  const response = await api.post('/posts', post);
+  if (!response.ok) throw new Error('Failed to create post');
+  return response.data;
+};
 
-  // Notes
-  getNotes: async () => {
-    const response = await fetch(`${API_BASE_URL}/notes`);
-    if (!response.ok) throw new Error('Failed to fetch notes');
-    return response.json();
-  },
+// Tasks
+export const getTasks = async () => {
+  const response = await api.get('/tasks');
+  if (!response.ok) throw new Error('Failed to fetch tasks');
+  return response.data;
+};
 
-  createNote: async (note) => {
-    const response = await fetch(`${API_BASE_URL}/notes`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(note),
-    });
-    if (!response.ok) throw new Error('Failed to create note');
-    return response.json();
-  },
+export const createTask = async (task) => {
+  const response = await api.post('/tasks', task);
+  if (!response.ok) throw new Error('Failed to create task');
+  return response.data;
+};
+
+// Notes
+export const getNotes = async () => {
+  const response = await api.get('/notes');
+  if (!response.ok) throw new Error('Failed to fetch notes');
+  return response.data;
+};
+
+export const createNote = async (note) => {
+  const response = await api.post('/notes', note);
+  if (!response.ok) throw new Error('Failed to create note');
+  return response.data;
 }; 
