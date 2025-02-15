@@ -10,6 +10,10 @@ import Dashboard from './components/common/Dashboard';
 import Header from './components/common/Header';
 import NotesManager from './components/notes/NotesManager';
 import { useAuth } from './contexts/AuthContext';
+import BlogList from './components/blog/BlogList';
+import BlogPost from './components/blog/BlogPost';
+import LandingPage from './components/landing/LandingPage';
+import TagFilterView from './components/common/TagFilterView';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -22,7 +26,7 @@ function AppContent() {
       {user && <Header />}
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<div>Home Page</div>} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
         
@@ -44,10 +48,18 @@ function AppContent() {
           } 
         />
         <Route 
+          path="/blog" 
+          element={
+            <ProtectedRoute>
+              <BlogList />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/blog/:id" 
           element={
             <ProtectedRoute>
-              <div>View Blog Post</div>
+              <BlogPost />
             </ProtectedRoute>
           } 
         />
@@ -64,6 +76,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <NotesManager />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/tags" 
+          element={
+            <ProtectedRoute>
+              <TagFilterView />
             </ProtectedRoute>
           } 
         />
