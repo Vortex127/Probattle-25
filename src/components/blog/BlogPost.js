@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CalendarIcon, UserIcon, TagIcon } from '@heroicons/react/24/outline';
 import WritingAssistant from '../writing-assistant/WritingAssistant';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import ExportButton from '../common/ExportButton';
+import ContentSkeleton from '../common/ContentSkeleton';
 
 export default function BlogPost() {
   const { id } = useParams();
@@ -34,18 +37,23 @@ export default function BlogPost() {
     navigate(`/tags?tags=${tag}`);
   };
 
+  useKeyboardShortcuts([
+    {
+      key: 'e',
+      ctrl: true,
+      action: () => handleExport('pdf')
+    },
+    {
+      key: 'm',
+      ctrl: true,
+      action: () => handleExport('markdown')
+    }
+  ]);
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-8"></div>
-          <div className="space-y-3">
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-          </div>
-        </div>
+        <ContentSkeleton />
       </div>
     );
   }
@@ -55,36 +63,42 @@ export default function BlogPost() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <article className="bg-white rounded-lg shadow-sm p-6">
-            <header className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                {post.title}
-              </h1>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="text-gray-600">{post.author}</span>
+            <div className="flex justify-between items-start mb-6">
+              <header className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                  {post.title}
+                </h1>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
+                    <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-gray-600">{post.author}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
+                    <span className="text-gray-600">
+                      {new Date(post.date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <span className="text-gray-600">{post.readingTime} read</span>
                 </div>
-                <div className="flex items-center">
-                  <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="text-gray-600">
-                    {new Date(post.date).toLocaleDateString()}
-                  </span>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => handleTagClick(tag)}
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors duration-150"
+                    >
+                      <TagIcon className="mr-1 h-3 w-3" />
+                      {tag}
+                    </button>
+                  ))}
                 </div>
-                <span className="text-gray-600">{post.readingTime} read</span>
+              </header>
+              <div className="flex space-x-2">
+                <ExportButton content={post} type="PDF" />
+                <ExportButton content={post} type="Markdown" />
               </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => handleTagClick(tag)}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors duration-150"
-                  >
-                    <TagIcon className="mr-1 h-3 w-3" />
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </header>
+            </div>
             <div 
               className="prose max-w-none"
               dangerouslySetInnerHTML={{ __html: post.content }}

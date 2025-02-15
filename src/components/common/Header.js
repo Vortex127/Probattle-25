@@ -1,8 +1,10 @@
 import { Fragment } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, MoonIcon, SunIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import SearchBar from './SearchBar';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -10,6 +12,7 @@ function classNames(...classes) {
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const navigation = [
@@ -22,6 +25,10 @@ export default function Header() {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleSearch = (query) => {
+    navigate(`/tags?search=${query}`);
   };
 
   return (
@@ -51,7 +58,21 @@ export default function Header() {
                   ))}
                 </div>
               </div>
-              <div className="hidden sm:ml-6 sm:flex sm:items-center">
+              <div className="flex-1 flex items-center justify-center px-2 lg:ml-6 lg:justify-end">
+                <SearchBar onSearch={handleSearch} />
+              </div>
+              <div className="flex items-center">
+                {/* Theme Toggle */}
+                <button
+                  onClick={toggleTheme}
+                  className="ml-6 p-2 text-gray-400 hover:text-gray-500"
+                >
+                  {theme === 'light' ? (
+                    <MoonIcon className="h-5 w-5" />
+                  ) : (
+                    <SunIcon className="h-5 w-5" />
+                  )}
+                </button>
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-3">
                   <div>

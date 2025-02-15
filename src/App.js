@@ -14,12 +14,18 @@ import BlogList from './components/blog/BlogList';
 import BlogPost from './components/blog/BlogPost';
 import LandingPage from './components/landing/LandingPage';
 import TagFilterView from './components/common/TagFilterView';
+import { ThemeProvider } from './contexts/ThemeContext';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import ProfileSettings from './components/profile/ProfileSettings';
+import Toast from './components/common/Toast';
+import { useState } from 'react';
 
 // Create a client
 const queryClient = new QueryClient();
 
 function AppContent() {
   const { user } = useAuth();
+  const [toast, setToast] = useState(null);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -87,20 +93,33 @@ function AppContent() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <ProfileSettings />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
+      {toast && <Toast {...toast} />}
     </div>
   );
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AuthProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
